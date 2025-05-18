@@ -5,12 +5,12 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
+import java.io.File;
+
 public class DriverFactory {
     private static WebDriver driver;
 
-    /**
-     * Получение драйвера (с инициализацией при первом вызове)
-     */
+    /** Возвращает уже инициализированный или создаёт новый драйвер */
     public static WebDriver getDriver() {
         if (driver == null) {
             initDriver();
@@ -18,9 +18,7 @@ public class DriverFactory {
         return driver;
     }
 
-    /**
-     * Инициализация драйвера. Читает параметр -Dbrowser (по умолчанию chrome).
-     */
+    /** Инициализация в зависимости от -Dbrowser */
     public static WebDriver initDriver() {
         String browser = System.getProperty("browser", "chrome");
         switch (browser.toLowerCase()) {
@@ -32,8 +30,15 @@ public class DriverFactory {
                 break;
             case "yandex":
                 WebDriverManager.chromedriver().setup();
+                String yPath = System.getProperty("yandex.browser.path");
+                if (yPath == null || !new File(yPath).exists()) {
+                    throw new IllegalArgumentException(
+                            "Укажите корректный путь к Yandex Browser. Пример команды для запуска:\n" +
+                                    "mvn test -Dbrowser=yandex -Dyandex.browser.path=\"C:\\Users\\User\\AppData\\Local\\Yandex\\YandexBrowser\\Application\\browser.exe\""
+                    );
+                }
                 ChromeOptions yOpts = new ChromeOptions();
-                yOpts.setBinary("C:/Users/User/AppData/Local/Yandex/YandexBrowser/Application/browser.exe");
+                yOpts.setBinary(yPath);
                 driver = new ChromeDriver(yOpts);
                 break;
             default:
@@ -43,6 +48,7 @@ public class DriverFactory {
         return driver;
     }
 
+    /** Завершить сессию */
     public static void quitDriver() {
         if (driver != null) {
             driver.quit();

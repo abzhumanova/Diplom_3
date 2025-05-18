@@ -1,42 +1,44 @@
 package org.example.tests;
 
-import org.example.driver.DriverFactory;
+import io.qameta.allure.junit4.DisplayName;
+import org.example.api.models.User;
+import org.example.pages.LoginPage;
 import org.example.pages.RegisterPage;
-import org.example.user.UserClient;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.assertNotNull;
-import org.openqa.selenium.WebDriver;
 
-public class RegistrationTest {
-    private WebDriver driver;
-    private RegisterPage registerPage;
-    private UserClient userClient;
+import static org.junit.Assert.*;
 
-    @Before
-    public void setUp() {
-        driver = DriverFactory.getDriver();
-        // Если регистрация располагается на отдельной странице, укажите правильный URL
-        driver.get("https://stellarburgers.nomoreparties.site/register");
-        registerPage = new RegisterPage(driver);
-        userClient = new UserClient();
+@DisplayName("Тесты регистрации")
+public class RegistrationTest extends TestBase {
+
+    @Test
+    @DisplayName("Успешная регистрация")
+    public void successfulRegistration() {
+        LoginPage lp = mainPage.clickLoginButton();
+        RegisterPage rp = lp.clickRegisterLink();
+        String email = "user" + System.currentTimeMillis() + "@mail.com";
+        String pwd = "password1";
+        rp.enterName("TestUser")
+                .enterEmail(email)
+                .enterPassword(pwd);
+        // создаём через UI, но сохраняем token через API для удаления
+        rp.clickRegisterButton();
+        // после успешной регистрации на главной
+        assertTrue(mainPage.isLoggedIn());
+        // получаем токен для удаления
+        accessToken = userClient.create(new User("TestUser", email, pwd));
+        assertNotNull(accessToken);
     }
 
     @Test
-    public void testSuccessfulRegistration() {
-        registerPage.enterEmail("test@example.com")
-                .enterName("TestUser")
-                .enterPassword("password123")
-                .clickRegisterButton();
-
-        // Получаем токен через API-клиент (в реальном проекте регистрация должна вернуть корректный токен)
-        String token = userClient.getToken("test@example.com", "password123");
-        assertNotNull("Токен не должен быть null после успешной регистрации", token);
-    }
-
-    @After
-    public void tearDown() {
-        DriverFactory.quitDriver();
+    @DisplayName("Ошибка регистрации: короткий пароль")
+    public void registrationWithShortPassword() {
+        LoginPage lp = mainPage.clickLoginButton();
+        RegisterPage rp = lp.clickRegisterLink();
+        rp.enterName(" short")
+                .enterEmail("short@mail.com")
+                .enterPassword("123");
+        rp.clickRegisterButton();
+        assertEquals("Некорректный пароль", rp.getPasswordError());
     }
 }

@@ -5,28 +5,31 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 public class ProfilePage {
-    private WebDriver driver;
+    private final WebDriver driver;
 
-    private final By logoutButton = By.xpath("//button[text()='Выход']");
-    private final By profileLink = By.xpath("//a[@href='/account/profile']");
-    private final By constructorLink = By.xpath("//p[text()='Конструктор']");
+    private final By constructorBtn = By.xpath("//p[text()='Конструктор']");
+    private final By logo = By.className("AppHeader_header__logo__2D0X2");
+    private final By logoutBtn = By.xpath("//button[text()='Выход']");
 
     public ProfilePage(WebDriver driver) {
         this.driver = driver;
     }
 
-    @Step("Выход из аккаунта")
-    public void logout() {
-        driver.findElement(logoutButton).click();
+    @Step("Перейти в Конструктор из профиля")
+    public BurgerConstructorPage clickConstructor() {
+        driver.findElement(constructorBtn).click();
+        return new BurgerConstructorPage(driver);
     }
 
-    @Step("Переход в конструктор")
-    public void navigateToConstructor() {
-        driver.findElement(constructorLink).click();
+    @Step("Перейти на главную по логотипу из профиля")
+    public BurgerConstructorPage clickLogo() {
+        driver.findElement(logo).click();
+        return new BurgerConstructorPage(driver);
     }
 
-    @Step("Проверка видимости кнопки выхода")
-    public boolean isLogoutButtonVisible() {
-        return driver.findElement(logoutButton).isDisplayed();
+    @Step("Выйти из аккаунта")
+    public MainPage clickLogout() {
+        driver.findElement(logoutBtn).click();
+        return new MainPage(driver);
     }
 }

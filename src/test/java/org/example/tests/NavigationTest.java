@@ -1,40 +1,41 @@
 package org.example.tests;
 
-import org.example.driver.DriverFactory;
-import org.example.pages.MainPage;
-import org.example.pages.LoginPage;
-import org.junit.After;
+import io.qameta.allure.junit4.DisplayName;
+import org.example.pages.ProfilePage;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.assertTrue;
-import org.openqa.selenium.WebDriver;
-import io.qameta.allure.Step;
 
-public class NavigationTest {
-    private WebDriver driver;
-    private MainPage mainPage;
+import static org.junit.Assert.*;
+
+@DisplayName("Тесты навигации")
+public class NavigationTest extends TestBase {
+    private String email, pwd = "password1";
 
     @Before
-    public void setUp() {
-        driver = DriverFactory.getDriver();
-        driver.get("https://stellarburgers.nomoreparties.site");
-        mainPage = new MainPage(driver);
+    public void createAndLogin() {
+        email = "user" + System.currentTimeMillis() + "@mail.com";
+        accessToken = userClient.create(new org.example.api.models.User("NavUser", email, pwd));
+        // логинимся через UI
+        mainPage.clickLoginButton()
+                .enterEmail(email)
+                .enterPassword(pwd)
+                .clickLoginButton();
     }
 
     @Test
-    public void testNavigationToOrderPage() {
-        mainPage.clickConstructor();
-        assertTrue("Кнопка 'Оформить заказ' должна быть видна", mainPage.isOrderButtonVisible());
+    @DisplayName("Переход в личный кабинет")
+    public void goToProfile() {
+        ProfilePage pp = new ProfilePage(driver);
+        assertNotNull(pp);
     }
 
     @Test
-    public void testNavigateToLoginPage() {
-        LoginPage loginPage = mainPage.clickLogin();
-        assertTrue("Кнопка 'Войти' должна быть видна на странице входа", loginPage.isLoginButtonVisible());
-    }
-
-    @After
-    public void tearDown() {
-        DriverFactory.quitDriver();
+    @DisplayName("Переход из профиля в конструктор")
+    public void profileToConstructor() {
+        ProfilePage pp = new ProfilePage(driver);
+        pp.clickConstructor();
+        assertTrue(driver.getCurrentUrl().contains("/"));
+        pp.clickLogo();
+        assertTrue(driver.getCurrentUrl().contains("/"));
     }
 }

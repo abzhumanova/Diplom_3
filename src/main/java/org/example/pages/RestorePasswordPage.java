@@ -5,28 +5,29 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 public class RestorePasswordPage {
-    private WebDriver driver;
-
-    private final By emailField = By.xpath("//input[@name='name']");
-    private final By restoreButton = By.xpath("//button[text()='Восстановить']");
+    private final WebDriver driver;
+    private final By emailField = By.name("email");
+    private final By resetBtn = By.xpath("//button[text()='Восстановить']");
     private final By loginLink = By.xpath("//a[text()='Войти']");
 
     public RestorePasswordPage(WebDriver driver) {
         this.driver = driver;
     }
 
-    @Step("Ввод email {email}")
-    public void enterEmail(String email) {
+    @Step("Ввод email для восстановления: {email}")
+    public RestorePasswordPage enterEmail(String email) {
         driver.findElement(emailField).sendKeys(email);
+        return this;
     }
 
-    @Step("Нажатие кнопки восстановления")
-    public void clickRestoreButton() {
-        driver.findElement(restoreButton).click();
+    @Step("Нажать 'Восстановить'")
+    public void clickResetButton() {
+        driver.findElement(resetBtn).click();
     }
 
-    @Step("Переход на страницу входа")
-    public void clickLoginLink() {
+    @Step("Перейти на страницу логина")
+    public LoginPage clickLoginLink() {
         driver.findElement(loginLink).click();
+        return new LoginPage(driver);
     }
 }

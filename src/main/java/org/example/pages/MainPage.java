@@ -6,56 +6,49 @@ import org.openqa.selenium.WebDriver;
 
 public class MainPage {
     private final WebDriver driver;
-    private static final String BASE_URL = "https://stellarburgers.nomoreparties.site";
+    private final String url = "https://stellarburgers.nomoreparties.site/";
 
-    // Локаторы
-    private final By btnConstructor     = By.xpath("//p[text()='Конструктор']");
-    private final By btnOrder           = By.xpath("//button[text()='Оформить заказ']");
-    private final By btnLoginOnMain     = By.xpath("//button[text()='Войти в аккаунт']");
-    private final By btnProfileWhenOut  = By.xpath("//p[text()='Личный кабинет']");
-    private final By btnLogout          = By.xpath("//button[text()='Выход']");
+    private final By loginButton = By.xpath("//button[text()='Войти в аккаунт']");
+    private final By profileButton = By.xpath("//p[text()='Личный Кабинет']");
+    private final By constructorButton = By.xpath("//p[text()='Конструктор']");
+    private final By logo = By.className("AppHeader_header__logo__2D0X2");
 
     public MainPage(WebDriver driver) {
         this.driver = driver;
     }
 
-    @Step("Открыть главную страницу Stellar Burgers")
+    @Step("Открыть главный экран")
     public MainPage open() {
-        driver.get(BASE_URL);
+        driver.get(url);
         return this;
     }
 
-    @Step("Нажать кнопку 'Конструктор'")
-    public MainPage clickConstructor() {
-        driver.findElement(btnConstructor).click();
-        return this;
-    }
-
-    @Step("Проверить, что кнопка 'Оформить заказ' видна")
-    public boolean isOrderButtonVisible() {
-        return driver.findElement(btnOrder).isDisplayed();
-    }
-
-    @Step("Нажать кнопку 'Войти в аккаунт' на главной")
+    @Step("Нажать 'Войти в аккаунт'")
     public LoginPage clickLoginButton() {
-        driver.findElement(btnLoginOnMain).click();
+        driver.findElement(loginButton).click();
         return new LoginPage(driver);
     }
 
-    @Step("Нажать 'Личный кабинет' когда ещё не авторизован")
+    @Step("Нажать 'Личный Кабинет' (unauthorized)")
     public LoginPage clickProfileButtonWhenUnauthorized() {
-        driver.findElement(btnProfileWhenOut).click();
+        driver.findElement(profileButton).click();
         return new LoginPage(driver);
     }
 
-    @Step("Проверить, что пользователь залогинен (видна кнопка выхода)")
-    public boolean isLoggedIn() {
-        return driver.findElement(btnLogout).isDisplayed();
+    @Step("Нажать 'Конструктор'")
+    public BurgerConstructorPage clickConstructor() {
+        driver.findElement(constructorButton).click();
+        return new BurgerConstructorPage(driver);
     }
 
-    // В класс MainPage добавляем новый метод (совместимость со старыми тестами)
-    @Step("Нажать на кнопку 'Войти в аккаунт' (алиас для clickLoginButton)")
-    public LoginPage clickLogin() {
-        return clickLoginButton();
+    @Step("Нажать на логотип")
+    public BurgerConstructorPage clickLogo() {
+        driver.findElement(logo).click();
+        return new BurgerConstructorPage(driver);
+    }
+
+    @Step("Проверить, что пользователь залогинен (видна кнопка 'Личный Кабинет')")
+    public boolean isLoggedIn() {
+        return driver.findElements(profileButton).size() > 0;
     }
 }

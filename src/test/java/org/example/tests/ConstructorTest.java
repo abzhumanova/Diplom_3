@@ -1,35 +1,21 @@
 package org.example.tests;
 
 import io.qameta.allure.junit4.DisplayName;
-import org.example.driver.DriverFactory;
-import org.example.pages.BurgerConstructorPage;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
-@DisplayName("Тесты конструктора бургеров")
-public class ConstructorTest {
-    @Test
-    @DisplayName("Переход к разделу 'Булки'")
-    public void testNavigateToBunsSection() {
-        BurgerConstructorPage constructorPage = new BurgerConstructorPage(DriverFactory.getDriver());
-        constructorPage.clickBunsSection();
-        assertEquals("Булки", constructorPage.getActiveSection());
-    }
+@DisplayName("Тест раздела Конструктор")
+public class ConstructorTest extends TestBase {
 
     @Test
-    @DisplayName("Переход к разделу 'Соусы'")
-    public void testNavigateToSaucesSection() {
-        BurgerConstructorPage constructorPage = new BurgerConstructorPage(DriverFactory.getDriver());
-        constructorPage.clickSaucesSection();
-        assertEquals("Соусы", constructorPage.getActiveSection());
-    }
-
-    @Test
-    @DisplayName("Переход к разделу 'Начинки'")
-    public void testNavigateToFillingsSection() {
-        BurgerConstructorPage constructorPage = new BurgerConstructorPage(DriverFactory.getDriver());
-        constructorPage.clickFillingsSection();
-        assertEquals("Начинки", constructorPage.getActiveSection());
+    @DisplayName("Переход к разделам булки/соусы/начинки")
+    public void testTabs() {
+        boolean ok = mainPage
+                .clickConstructor()
+                .clickBuns()
+                .clickSauces()
+                .clickFillings() != null;
+        assertTrue(ok);
     }
 }

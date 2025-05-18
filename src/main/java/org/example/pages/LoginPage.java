@@ -1,41 +1,49 @@
 package org.example.pages;
 
+import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import io.qameta.allure.Step;
 
 public class LoginPage {
-    private WebDriver driver;
+    private final WebDriver driver;
 
-    // Локаторы для формы входа
-    private By emailField = By.xpath("//input[@name='name']");
-    private By passwordField = By.xpath("//input[@name='password']");
-    private By loginButton = By.xpath("//button[text()='Войти']");
+    private final By emailField = By.name("name");
+    private final By passwordField = By.name("Пароль");
+    private final By loginBtn = By.xpath("//button[text()='Войти']");
+    private final By registerLink = By.xpath("//a[text()='Зарегистрироваться']");
+    private final By resetLink = By.xpath("//a[text()='Восстановить пароль']");
 
     public LoginPage(WebDriver driver) {
         this.driver = driver;
     }
 
-    @Step("Проверить, что кнопка 'Войти' видна")
-    public boolean isLoginButtonVisible() {
-        return driver.findElement(loginButton).isDisplayed();
-    }
-
-    @Step("Ввести email: {0}")
+    @Step("Ввод email: {email}")
     public LoginPage enterEmail(String email) {
         driver.findElement(emailField).sendKeys(email);
         return this;
     }
 
-    @Step("Ввести пароль: {0}")
-    public LoginPage enterPassword(String password) {
-        driver.findElement(passwordField).sendKeys(password);
+    @Step("Ввод password: {pwd}")
+    public LoginPage enterPassword(String pwd) {
+        driver.findElement(passwordField).sendKeys(pwd);
         return this;
     }
 
-    @Step("Нажать на кнопку 'Войти'")
+    @Step("Нажать кнопку 'Войти'")
     public MainPage clickLoginButton() {
-        driver.findElement(loginButton).click();
+        driver.findElement(loginBtn).click();
         return new MainPage(driver);
+    }
+
+    @Step("Перейти на страницу регистрации")
+    public RegisterPage clickRegisterLink() {
+        driver.findElement(registerLink).click();
+        return new RegisterPage(driver);
+    }
+
+    @Step("Перейти на страницу восстановления пароля")
+    public RestorePasswordPage clickResetLink() {
+        driver.findElement(resetLink).click();
+        return new RestorePasswordPage(driver);
     }
 }
