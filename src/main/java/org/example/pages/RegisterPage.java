@@ -10,8 +10,8 @@ public class RegisterPage {
     private final By nameField = By.name("name");
     private final By emailField = By.name("email");
     private final By passwordField = By.name("Пароль");
-    private final By registerBtn = By.xpath("//button[text()='Зарегистрироваться']");
-    private final By loginLink = By.xpath("//a[text()='Войти']");
+    private final By registerBtn = By.cssSelector("button.button_button__33qZ0.button_button_type_primary__1O7Bx");
+    private final By loginLink = By.cssSelector("a[href='/login']");
 
     public RegisterPage(WebDriver driver) {
         this.driver = driver;

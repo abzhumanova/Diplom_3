@@ -8,7 +8,7 @@ public class MainPage {
     private final WebDriver driver;
     private final String url = "https://stellarburgers.nomoreparties.site/";
 
-    private final By loginButton = By.xpath("//button[text()='Войти в аккаунт']");
+    private final By loginButton = By.xpath("//button[contains(text(), 'Войти в аккаунт')]");
     private final By profileButton = By.xpath("//p[text()='Личный Кабинет']");
     private final By constructorButton = By.xpath("//p[text()='Конструктор']");
     private final By logo = By.className("AppHeader_header__logo__2D0X2");

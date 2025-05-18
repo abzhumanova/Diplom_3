@@ -8,7 +8,7 @@ public class LoginPage {
     private final WebDriver driver;
 
     private final By emailField = By.name("name");
-    private final By passwordField = By.name("Пароль");
+    private final By passwordField = By.xpath("//input[@name='Пароль']");
     private final By loginBtn = By.xpath("//button[text()='Войти']");
     private final By registerLink = By.xpath("//a[text()='Зарегистрироваться']");
     private final By resetLink = By.xpath("//a[text()='Восстановить пароль']");

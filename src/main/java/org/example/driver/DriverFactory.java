@@ -4,13 +4,13 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 public class DriverFactory {
     private static WebDriver driver;
 
-    /** Возвращает уже инициализированный или создаёт новый драйвер */
+    /** Возвращает готовый или создаёт новый драйвер */
     public static WebDriver getDriver() {
         if (driver == null) {
             initDriver();
@@ -18,37 +18,45 @@ public class DriverFactory {
         return driver;
     }
 
-    /** Инициализация в зависимости от -Dbrowser */
+    /** Инициализация с учётом версии ChromeDriver */
     public static WebDriver initDriver() {
-        String browser = System.getProperty("browser", "chrome");
-        switch (browser.toLowerCase()) {
+        String browser = System.getProperty("browser", "chrome").toLowerCase();
+
+        // Явно задаём версию ChromeDriver для Chrome 136
+        WebDriverManager.chromedriver().driverVersion("114.0.5735.90").setup();
+
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments(
+                "--remote-allow-origins=*",
+                "--start-maximized",
+                "--disable-notifications"
+        );
+
+        switch (browser) {
             case "chrome":
-                WebDriverManager.chromedriver().setup();
-                ChromeOptions opts = new ChromeOptions();
-                opts.addArguments("--remote-allow-origins=*");
-                driver = new ChromeDriver(opts);
+                driver = new ChromeDriver(options);
                 break;
             case "yandex":
-                WebDriverManager.chromedriver().setup();
-                String yPath = System.getProperty("yandex.browser.path");
-                if (yPath == null || !new File(yPath).exists()) {
+                String yandexPath = System.getProperty("yandex.browser.path");
+                if (yandexPath == null || !new File(yandexPath).exists()) {
                     throw new IllegalArgumentException(
-                            "Укажите корректный путь к Yandex Browser. Пример команды для запуска:\n" +
-                                    "mvn test -Dbrowser=yandex -Dyandex.browser.path=\"C:\\Users\\User\\AppData\\Local\\Yandex\\YandexBrowser\\Application\\browser.exe\""
+                            "Укажите путь к Yandex Browser. Пример:\n" +
+                                    "mvn test -Dbrowser=yandex -Dyandex.browser.path=\"C:\\путь\\к\\browser.exe\""
                     );
                 }
-                ChromeOptions yOpts = new ChromeOptions();
-                yOpts.setBinary(yPath);
-                driver = new ChromeDriver(yOpts);
+                options.setBinary(yandexPath);
+                driver = new ChromeDriver(options);
                 break;
             default:
-                throw new IllegalArgumentException("Unknown browser: " + browser);
+                throw new IllegalArgumentException("Unsupported browser: " + browser);
         }
+
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.manage().window().maximize();
         return driver;
     }
 
-    /** Завершить сессию */
+    /** Корректное завершение работы драйвера */
     public static void quitDriver() {
         if (driver != null) {
             driver.quit();

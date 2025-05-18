@@ -3,12 +3,17 @@ package org.example.pages;
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import java.time.Duration;
 
 public class BurgerConstructorPage {
     private final WebDriver driver;
-    private final By bunsTab = By.xpath("//span[text()='Булки']");
-    private final By saucesTab = By.xpath("//span[text()='Соусы']");
-    private final By fillingsTab = By.xpath("//span[text()='Начинки']");
+
+    // Локаторы для разделов конструктора
+    private final By bunsSection = By.xpath("//span[text()='Булки']/parent::div");
+    private final By saucesSection = By.xpath("//span[text()='Соусы']/parent::div");
+    private final By fillingsSection = By.xpath("//span[text()='Начинки']/parent::div");
 
     public BurgerConstructorPage(WebDriver driver) {
         this.driver = driver;
@@ -16,19 +21,26 @@ public class BurgerConstructorPage {
 
     @Step("Перейти в раздел Булки")
     public BurgerConstructorPage clickBuns() {
-        driver.findElement(bunsTab).click();
+        clickSection(bunsSection);
         return this;
     }
 
     @Step("Перейти в раздел Соусы")
     public BurgerConstructorPage clickSauces() {
-        driver.findElement(saucesTab).click();
+        clickSection(saucesSection);
         return this;
     }
 
     @Step("Перейти в раздел Начинки")
     public BurgerConstructorPage clickFillings() {
-        driver.findElement(fillingsTab).click();
+        clickSection(fillingsSection);
         return this;
+    }
+
+    // Общий метод для клика с явным ожиданием
+    private void clickSection(By sectionLocator) {
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.elementToBeClickable(sectionLocator))
+                .click();
     }
 }
