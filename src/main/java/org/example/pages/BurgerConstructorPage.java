@@ -9,38 +9,38 @@ import java.time.Duration;
 
 public class BurgerConstructorPage {
     private final WebDriver driver;
+    private final WebDriverWait wait;
 
-    // Локаторы для разделов конструктора
     private final By bunsSection = By.xpath("//span[text()='Булки']/parent::div");
     private final By saucesSection = By.xpath("//span[text()='Соусы']/parent::div");
     private final By fillingsSection = By.xpath("//span[text()='Начинки']/parent::div");
+    private final By activeTab = By.xpath("//div[contains(@class, 'tab_tab_type_current__2BEPc')]");
 
     public BurgerConstructorPage(WebDriver driver) {
         this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(5));
     }
 
-    @Step("Перейти в раздел Булки")
+    @Step("Перейти в раздел 'Булки'")
     public BurgerConstructorPage clickBuns() {
-        clickSection(bunsSection);
+        wait.until(ExpectedConditions.elementToBeClickable(bunsSection)).click();
         return this;
     }
 
-    @Step("Перейти в раздел Соусы")
+    @Step("Перейти в раздел 'Соусы'")
     public BurgerConstructorPage clickSauces() {
-        clickSection(saucesSection);
+        wait.until(ExpectedConditions.elementToBeClickable(saucesSection)).click();
         return this;
     }
 
-    @Step("Перейти в раздел Начинки")
+    @Step("Перейти в раздел 'Начинки'")
     public BurgerConstructorPage clickFillings() {
-        clickSection(fillingsSection);
+        wait.until(ExpectedConditions.elementToBeClickable(fillingsSection)).click();
         return this;
     }
 
-    // Общий метод для клика с явным ожиданием
-    private void clickSection(By sectionLocator) {
-        new WebDriverWait(driver, Duration.ofSeconds(5))
-                .until(ExpectedConditions.elementToBeClickable(sectionLocator))
-                .click();
+    @Step("Проверить активный раздел")
+    public String getActiveSection() {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(activeTab)).getText();
     }
 }

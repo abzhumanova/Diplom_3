@@ -1,32 +1,25 @@
 package org.example.tests;
 
-import org.example.api.UserClient;
-import org.example.driver.DriverFactory;
-import org.example.pages.MainPage;
+import org.example.BrowserUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.openqa.selenium.WebDriver;
+import java.util.concurrent.TimeUnit;
 
 public abstract class TestBase {
     protected WebDriver driver;
-    protected MainPage mainPage;
-    protected UserClient userClient;
-    protected String accessToken; // токен для удаления пользователя
 
     @Before
     public void setUp() {
-        driver = DriverFactory.getDriver();
-        mainPage = new MainPage(driver).open();
-        userClient = new UserClient();
+        driver = BrowserUtils.getDriver();
+        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+        driver.manage().window().maximize();
     }
 
     @After
     public void tearDown() {
-        // удаляем по токену, если создан
-        if (accessToken != null) {
-            userClient.delete(accessToken);
-            accessToken = null;
+        if (driver != null) {
+            driver.quit();
         }
-        DriverFactory.quitDriver();
     }
 }

@@ -1,54 +1,120 @@
 package org.example.pages;
 
-import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
+import java.util.List;
 
 public class MainPage {
     private final WebDriver driver;
-    private final String url = "https://stellarburgers.nomoreparties.site/";
+    private final WebDriverWait wait;
 
-    private final By loginButton = By.xpath("//button[contains(text(), 'Войти в аккаунт')]");
-    private final By profileButton = By.xpath("//p[text()='Личный Кабинет']");
-    private final By constructorButton = By.xpath("//p[text()='Конструктор']");
-    private final By logo = By.className("AppHeader_header__logo__2D0X2");
+    // Локаторы верхнего меню
+    private final By constructorTab = By.xpath("//p[text()='Конструктор']");
+    private final By orderFeedTab = By.xpath("//p[text()='Лента Заказов']");
+    private final By personalAccountButton = By.xpath("//p[text()='Личный Кабинет']");
+    private final By logo = By.cssSelector("div.AppHeader_header__logo__2D0X2");
+
+    // Локаторы конструктора
+    private final By bunsSection = By.xpath("//span[text()='Булки']/..");
+    private final By saucesSection = By.xpath("//span[text()='Соусы']/..");
+    private final By fillingsSection = By.xpath("//span[text()='Начинки']/..");
+    private final By loginButton = By.xpath("//button[text()='Войти в аккаунт']");
+
+    // Локаторы ингредиентов
+    private final By ingredientItems = By.cssSelector("div.BurgerIngredients_ingredients__menuContainer__Xu3Mo");
+    private final By ingredientCards = By.cssSelector("div.IngredientCard_card__1UuT4");
+
+    // Локаторы конструктора бургера
+    private final By burgerConstructor = By.cssSelector("section.BurgerConstructor_basket__29Cd7");
+    private final By orderButton = By.xpath("//button[text()='Оформить заказ']");
+
+    // Локатор активного раздела
+    private final By activeTab = By.cssSelector("div.tab_tab_type_current__2BEPc");
 
     public MainPage(WebDriver driver) {
         this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
-    @Step("Открыть главный экран")
-    public MainPage open() {
-        driver.get(url);
-        return this;
+    public void open() {
+        driver.get("https://stellarburgers.nomoreparties.site");
     }
 
-    @Step("Нажать 'Войти в аккаунт'")
-    public LoginPage clickLoginButton() {
-        driver.findElement(loginButton).click();
-        return new LoginPage(driver);
+    // Основные действия с элементами верхнего меню
+    public void clickLoginButton() {
+        wait.until(ExpectedConditions.elementToBeClickable(loginButton)).click();
     }
 
-    @Step("Нажать 'Личный Кабинет' (unauthorized)")
-    public LoginPage clickProfileButtonWhenUnauthorized() {
-        driver.findElement(profileButton).click();
-        return new LoginPage(driver);
+    public void clickPersonalAccountButton() {
+        wait.until(ExpectedConditions.elementToBeClickable(personalAccountButton)).click();
     }
 
-    @Step("Нажать 'Конструктор'")
-    public BurgerConstructorPage clickConstructor() {
-        driver.findElement(constructorButton).click();
-        return new BurgerConstructorPage(driver);
+    public void clickConstructorTab() {
+        wait.until(ExpectedConditions.elementToBeClickable(constructorTab)).click();
     }
 
-    @Step("Нажать на логотип")
-    public BurgerConstructorPage clickLogo() {
-        driver.findElement(logo).click();
-        return new BurgerConstructorPage(driver);
+    public void clickOrderFeedTab() {
+        wait.until(ExpectedConditions.elementToBeClickable(orderFeedTab)).click();
     }
 
-    @Step("Проверить, что пользователь залогинен (видна кнопка 'Личный Кабинет')")
-    public boolean isLoggedIn() {
-        return driver.findElements(profileButton).size() > 0;
+    public void clickLogo() {
+        wait.until(ExpectedConditions.elementToBeClickable(logo)).click();
+    }
+
+    // Действия с разделами конструктора
+    public void selectBunsSection() {
+        wait.until(ExpectedConditions.elementToBeClickable(bunsSection)).click();
+    }
+
+    public void selectSaucesSection() {
+        wait.until(ExpectedConditions.elementToBeClickable(saucesSection)).click();
+    }
+
+    public void selectFillingsSection() {
+        wait.until(ExpectedConditions.elementToBeClickable(fillingsSection)).click();
+    }
+
+    // Проверки состояний
+    public boolean isBunsSectionActive() {
+        WebElement activeElement = wait.until(ExpectedConditions.visibilityOfElementLocated(activeTab));
+        return activeElement.getText().contains("Булки");
+    }
+
+    public boolean isSaucesSectionActive() {
+        WebElement activeElement = wait.until(ExpectedConditions.visibilityOfElementLocated(activeTab));
+        return activeElement.getText().contains("Соусы");
+    }
+
+    public boolean isFillingsSectionActive() {
+        WebElement activeElement = wait.until(ExpectedConditions.visibilityOfElementLocated(activeTab));
+        return activeElement.getText().contains("Начинки");
+    }
+
+    public boolean isAuthorized() {
+        try {
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(orderButton)).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // Работа с ингредиентами
+    public List<WebElement> getIngredientCards() {
+        return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(ingredientCards));
+    }
+
+    // Дополнительные полезные методы
+    public boolean isPageLoaded() {
+        try {
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(constructorTab)).isDisplayed() &&
+                    wait.until(ExpectedConditions.visibilityOfElementLocated(loginButton)).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

@@ -1,44 +1,70 @@
 package org.example.tests;
 
-import io.qameta.allure.junit4.DisplayName;
+import org.example.api.UserClient;
 import org.example.api.models.User;
 import org.example.pages.LoginPage;
+import org.example.pages.MainPage;
 import org.example.pages.RegisterPage;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.assertTrue;
 
-import static org.junit.Assert.*;
-
-@DisplayName("Тесты регистрации")
 public class RegistrationTest extends TestBase {
+    private final UserClient userClient = new UserClient();
+    private String accessToken;
+    private User user;
 
-    @Test
-    @DisplayName("Успешная регистрация")
-    public void successfulRegistration() {
-        LoginPage lp = mainPage.clickLoginButton();
-        RegisterPage rp = lp.clickRegisterLink();
-        String email = "user" + System.currentTimeMillis() + "@mail.com";
-        String pwd = "password1";
-        rp.enterName("TestUser")
-                .enterEmail(email)
-                .enterPassword(pwd);
-        // создаём через UI, но сохраняем token через API для удаления
-        rp.clickRegisterButton();
-        // после успешной регистрации на главной
-        assertTrue(mainPage.isLoggedIn());
-        // получаем токен для удаления
-        accessToken = userClient.create(new User("TestUser", email, pwd));
-        assertNotNull(accessToken);
+    @Before
+    public void setUp() {
+        user = new User(
+                "testuser-" + System.currentTimeMillis() + "@example.com",
+                "validPass123",
+                "Test User"
+        );
     }
 
     @Test
-    @DisplayName("Ошибка регистрации: короткий пароль")
-    public void registrationWithShortPassword() {
-        LoginPage lp = mainPage.clickLoginButton();
-        RegisterPage rp = lp.clickRegisterLink();
-        rp.enterName(" short")
-                .enterEmail("short@mail.com")
-                .enterPassword("123");
-        rp.clickRegisterButton();
-        assertEquals("Некорректный пароль", rp.getPasswordError());
+    public void testSuccessfulRegistration() {
+        MainPage mainPage = new MainPage(driver);
+        mainPage.open();
+        mainPage.clickLoginButton();
+
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.clickRegisterLink();
+
+        RegisterPage registerPage = new RegisterPage(driver);
+        registerPage.enterName(user.getName())
+                .enterEmail(user.getEmail())
+                .enterPassword(user.getPassword())
+                .clickRegisterButton();
+
+        this.accessToken = userClient.register(user);
+        assertTrue(new LoginPage(driver).isLoginFormDisplayed());
+    }
+
+    @Test
+    public void testRegistrationWithInvalidPassword() {
+        MainPage mainPage = new MainPage(driver);
+        mainPage.open();
+        mainPage.clickLoginButton();
+
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.clickRegisterLink();
+
+        RegisterPage registerPage = new RegisterPage(driver);
+        registerPage.enterName("Invalid User")
+                .enterEmail("invalid@example.com")
+                .enterPassword("short")
+                .clickRegisterButton();
+
+        assertTrue(registerPage.isPasswordErrorDisplayed());
+    }
+
+    @After
+    public void tearDown() {
+        if (accessToken != null) {
+            userClient.delete(accessToken);
+        }
     }
 }

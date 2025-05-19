@@ -9,34 +9,31 @@ import java.time.Duration;
 
 public class RestorePasswordPage {
     private final WebDriver driver;
+    private final WebDriverWait wait;
+
     private final By emailField = By.xpath("//input[@name='name']");
     private final By restoreButton = By.xpath("//button[text()='Восстановить']");
     private final By loginLink = By.xpath("//a[text()='Войти']");
 
     public RestorePasswordPage(WebDriver driver) {
         this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(5));
     }
 
     @Step("Ввод email для восстановления: {email}")
     public RestorePasswordPage enterEmail(String email) {
-        new WebDriverWait(driver, Duration.ofSeconds(5))
-                .until(ExpectedConditions.visibilityOfElementLocated(emailField))
-                .sendKeys(email);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(emailField)).sendKeys(email);
         return this;
     }
 
     @Step("Нажать 'Восстановить'")
-    public void clickResetButton() {
-        new WebDriverWait(driver, Duration.ofSeconds(5))
-                .until(ExpectedConditions.elementToBeClickable(restoreButton))
-                .click();
+    public void clickRestoreButton() {
+        wait.until(ExpectedConditions.elementToBeClickable(restoreButton)).click();
     }
 
-    @Step("Перейти на страницу логина")
+    @Step("Перейти на страницу входа")
     public LoginPage clickLoginLink() {
-        new WebDriverWait(driver, Duration.ofSeconds(5))
-                .until(ExpectedConditions.elementToBeClickable(loginLink))
-                .click();
+        wait.until(ExpectedConditions.elementToBeClickable(loginLink)).click();
         return new LoginPage(driver);
     }
 }

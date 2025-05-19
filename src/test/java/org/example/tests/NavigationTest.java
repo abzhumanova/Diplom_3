@@ -1,41 +1,60 @@
 package org.example.tests;
 
-import io.qameta.allure.junit4.DisplayName;
-import org.example.pages.ProfilePage;
+import org.example.api.UserClient;
+import org.example.api.models.User;
+import org.example.pages.*;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.assertTrue;
 
-import static org.junit.Assert.*;
-
-@DisplayName("Тесты навигации")
 public class NavigationTest extends TestBase {
-    private String email, pwd = "password1";
+    private UserClient userClient = new UserClient();
+    private String accessToken;
+    private User user;
 
     @Before
-    public void createAndLogin() {
-        email = "user" + System.currentTimeMillis() + "@mail.com";
-        accessToken = userClient.create(new org.example.api.models.User("NavUser", email, pwd));
-        // логинимся через UI
-        mainPage.clickLoginButton()
-                .enterEmail(email)
-                .enterPassword(pwd)
-                .clickLoginButton();
+    public void setUp() {
+        user = new User(
+                "nav-test-" + System.currentTimeMillis() + "@example.com",
+                "navPass123",
+                "Navigation Test"
+        );
+        this.accessToken = userClient.register(user);
     }
 
     @Test
-    @DisplayName("Переход в личный кабинет")
-    public void goToProfile() {
-        ProfilePage pp = new ProfilePage(driver);
-        assertNotNull(pp);
+    public void testNavigationToConstructor() {
+        MainPage mainPage = new MainPage(driver);
+        mainPage.open();
+
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.login(user.getEmail(), user.getPassword());
+
+        PersonalAccountPage accountPage = new PersonalAccountPage(driver);
+        accountPage.clickConstructorLink();
+
+        assertTrue(mainPage.isPageLoaded());
     }
 
     @Test
-    @DisplayName("Переход из профиля в конструктор")
-    public void profileToConstructor() {
-        ProfilePage pp = new ProfilePage(driver);
-        pp.clickConstructor();
-        assertTrue(driver.getCurrentUrl().contains("/"));
-        pp.clickLogo();
-        assertTrue(driver.getCurrentUrl().contains("/"));
+    public void testNavigationViaLogo() {
+        MainPage mainPage = new MainPage(driver);
+        mainPage.open();
+
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.login(user.getEmail(), user.getPassword());
+
+        PersonalAccountPage accountPage = new PersonalAccountPage(driver);
+        accountPage.clickLogo();
+
+        assertTrue(mainPage.isPageLoaded());
+    }
+
+    @After
+    public void tearDown() {
+        if (accessToken != null) {
+            userClient.delete(accessToken);
+        }
     }
 }

@@ -1,21 +1,26 @@
 package org.example.tests;
 
-import io.qameta.allure.junit4.DisplayName;
+import org.example.pages.BurgerConstructorPage;
+import org.example.pages.MainPage;
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
-import static org.junit.Assert.*;
-
-@DisplayName("Тест раздела Конструктор")
 public class ConstructorTest extends TestBase {
 
     @Test
-    @DisplayName("Переход к разделам булки/соусы/начинки")
-    public void testTabs() {
-        boolean ok = mainPage
-                .clickConstructor()
-                .clickBuns()
-                .clickSauces()
-                .clickFillings() != null;
-        assertTrue(ok);
+    public void testSwitchBetweenConstructorTabs() {
+        MainPage mainPage = new MainPage(driver);
+        mainPage.open();
+
+        BurgerConstructorPage constructorPage = new BurgerConstructorPage(driver);
+
+        constructorPage.clickSauces();
+        assertEquals("Соусы", constructorPage.getActiveSection());
+
+        constructorPage.clickFillings();
+        assertEquals("Начинки", constructorPage.getActiveSection());
+
+        constructorPage.clickBuns();
+        assertEquals("Булки", constructorPage.getActiveSection());
     }
 }

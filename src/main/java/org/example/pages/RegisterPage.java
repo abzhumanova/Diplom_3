@@ -1,54 +1,58 @@
 package org.example.pages;
 
-import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import java.time.Duration;
 
 public class RegisterPage {
     private final WebDriver driver;
+    private final WebDriverWait wait;
 
-    private final By nameField = By.name("name");
-    private final By emailField = By.name("email");
-    private final By passwordField = By.name("Пароль");
-    private final By registerBtn = By.cssSelector("button.button_button__33qZ0.button_button_type_primary__1O7Bx");
-    private final By loginLink = By.cssSelector("a[href='/login']");
+    // Локаторы формы регистрации
+    private final By nameField = By.xpath("//label[text()='Имя']/following-sibling::input");
+    private final By emailField = By.xpath("//label[text()='Email']/following-sibling::input");
+    private final By passwordField = By.xpath("//label[text()='Пароль']/following-sibling::input");
+    private final By registerButton = By.xpath("//button[text()='Зарегистрироваться']");
+
+    // Локаторы ошибок
+    private final By passwordError = By.xpath("//p[contains(@class,'input__error') and text()='Некорректный пароль']");
+    private final By loginLink = By.xpath("//a[text()='Войти']");
 
     public RegisterPage(WebDriver driver) {
         this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
-    @Step("Ввод name: {name}")
     public RegisterPage enterName(String name) {
-        driver.findElement(nameField).sendKeys(name);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(nameField)).sendKeys(name);
         return this;
     }
 
-    @Step("Ввод email: {email}")
     public RegisterPage enterEmail(String email) {
-        driver.findElement(emailField).sendKeys(email);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(emailField)).sendKeys(email);
         return this;
     }
 
-    @Step("Ввод password: {pwd}")
-    public RegisterPage enterPassword(String pwd) {
-        driver.findElement(passwordField).sendKeys(pwd);
+    public RegisterPage enterPassword(String password) {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(passwordField)).sendKeys(password);
         return this;
     }
 
-    @Step("Нажать 'Зарегистрироваться'")
-    public MainPage clickRegisterButton() {
-        driver.findElement(registerBtn).click();
-        return new MainPage(driver);
+    public void clickRegisterButton() {
+        wait.until(ExpectedConditions.elementToBeClickable(registerButton)).click();
     }
 
-    @Step("Перейти на страницу логина")
-    public LoginPage clickLoginLink() {
-        driver.findElement(loginLink).click();
-        return new LoginPage(driver);
+    public boolean isPasswordErrorDisplayed() {
+        try {
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(passwordError)).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
     }
 
-    @Step("Получить текст ошибки под паролем")
-    public String getPasswordError() {
-        return driver.findElement(By.xpath("//p[text()='Некорректный пароль']")).getText();
+    public void clickLoginLink() {
+        wait.until(ExpectedConditions.elementToBeClickable(loginLink)).click();
     }
 }
