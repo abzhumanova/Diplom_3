@@ -7,27 +7,29 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
-import java.util.concurrent.ThreadLocalRandom;
+import com.github.javafaker.Faker;
 
 import static org.junit.Assert.assertTrue;
 
-/* Регистрация
-Проверь:
-Успешную регистрацию.
-Ошибку для некорректного пароля. Минимальный пароль — шесть символов.*/
 public class RegisterUserTest extends BaseTest {
-
     private RegisterPage registerPage;
     private LoginPage loginPage;
     private final UserApiHelper apiHelper = new UserApiHelper();
-    int random = ThreadLocalRandom.current().nextInt(100,100_000);
-    private final String email = "zhumanova" + random + "@yandex.ru";
-    private final String name = "Ayslu";
-    private final String password = "UhamakKp17";
+    private String email;
+    private String name;
+    private String password;
     private boolean userWasCreated = false;
 
     @Before
     public void setUpPage() {
+        Faker faker = new Faker();
+        email = faker.internet().emailAddress();
+        name = faker.name().firstName();
+        password = generateValidPassword();
+
+        // Добавляем эту строку для явного указания пути к ChromeDriver
+        System.setProperty("webdriver.chrome.driver", "C:\\Users\\User\\projects\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe");
+
         registerPage = new RegisterPage(driver);
         loginPage = new LoginPage(driver);
         registerPage.open();
@@ -60,5 +62,10 @@ public class RegisterUserTest extends BaseTest {
     public void userCannotRegisterWithShortPasswordTest() {
         registerPage.register(name, email, "12345");
         assertTrue(driver.getPageSource().contains("Некорректный пароль"));
+    }
+
+    private String generateValidPassword() {
+        // длина от 6 до 12, с верхним/нижним регистром, цифрами и спецсимволами
+        return new Faker().internet().password(6, 12, true, true, true);
     }
 }

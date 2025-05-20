@@ -25,6 +25,9 @@ public class ConstructorNavigationTest extends BaseTest {
 
     @Before
     public void setUpPage() {
+        // Добавляем эту строку для явного указания пути к ChromeDriver
+        System.setProperty("webdriver.chrome.driver", "C:\\Users\\User\\projects\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe");
+
         apiHelper.createUser(email, password, name);
         mainPage = new MainPage(driver);
         loginPage = new LoginPage(driver);

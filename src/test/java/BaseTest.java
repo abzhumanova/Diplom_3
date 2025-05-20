@@ -1,47 +1,46 @@
-import io.github.bonigarcia.wdm.WebDriverManager;
+import io.qameta.allure.Step;
 import org.junit.After;
 import org.junit.Before;
+import org.openqa.selenium.Cookie;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
+import utils.BrowserFactory;
 
-import java.io.File;
 import java.time.Duration;
 
-/*
- * Открытие и закрытие браузера
- * */
 public class BaseTest {
-
     protected WebDriver driver;
+    private UserApiHelper apiHelper = new UserApiHelper(); // Create an instance of UserApiHelper
 
+    @Step("Настройка браузера")
     @Before
     public void setUp() {
+        System.setProperty("wdm.prohibit-download", "true");
+        System.setProperty("webdriver.http.factory", "jdk-http-client");
+
         String browser = System.getProperty("browser", "chrome");
-
-        WebDriverManager.chromedriver().setup();
-
-        if (browser.equalsIgnoreCase("yandex")) {
-            WebDriverManager.chromedriver()
-                    .driverVersion("134.0.6998.996") // версия Яндекс браузера
-                    .setup();
-            // Путь к Яндекс браузеру
-            String yandexPath = "C:\\Users\\User\\AppData\\Local\\Yandex\\YandexBrowser\\Application\\browser.exe";
-
-            ChromeOptions options = new ChromeOptions();
-            options.setBinary(new File(yandexPath)); // подключаем Yandex
-            driver = new ChromeDriver(options);
-
-        } else {
-            // По умолчанию Chrome
-            WebDriverManager.chromedriver().setup();
-            driver = new ChromeDriver();
-        }
+        driver = BrowserFactory.createBrowser(browser);
 
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
         driver.manage().window().maximize();
+
+        // --- Получение и установка токенов ---
+        String accessToken = apiHelper.getAccessToken("your_email@example.com", "your_password"); // Replace with valid credentials
+        String refreshToken = null; // Refresh token is not really needed for logging in, using accessToken is enough
+
+        driver.get(UserApiHelper.BASE_URL); // Open the application's main page
+
+        driver.manage().addCookie(new Cookie("accessToken", accessToken));
+
+        ((JavascriptExecutor) driver).executeScript(
+                "window.localStorage.setItem('refreshToken', arguments[0]);",
+                refreshToken // refreshToken can be null here
+        );
+
+        driver.navigate().refresh(); // Refresh the page to apply the tokens
     }
 
+    @Step("Закрытие браузера")
     @After
     public void tearDown() {
         if (driver != null) {

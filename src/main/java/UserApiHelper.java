@@ -7,7 +7,7 @@ import static io.restassured.RestAssured.given;
 
 public class UserApiHelper {
 
-    private static final String BASE_URL = "https://stellarburgers.nomoreparties.site";
+    public  static final String BASE_URL = "https://stellarburgers.nomoreparties.site";
     private static final String CREATE_USER = "/api/auth/register";
     private static final String LOGIN_USER = "/api/auth/login";
     private static final String DELETE_USER = "/api/auth/user";
@@ -35,7 +35,7 @@ public class UserApiHelper {
     }
 
     @Step("Получение accessToken через API")
-    private String getAccessToken(String email, String password) {
+    public String getAccessToken(String email, String password) {
         Response response = given()
                 .baseUri(BASE_URL)
                 .header("Content-Type", "application/json")

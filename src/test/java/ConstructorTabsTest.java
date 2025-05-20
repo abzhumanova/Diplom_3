@@ -16,6 +16,9 @@ public class ConstructorTabsTest extends BaseTest {
 
     @Before
     public void setUpPage() {
+        // Добавляем эту строку для явного указания пути к ChromeDriver
+        System.setProperty("webdriver.chrome.driver", "C:\\Users\\User\\projects\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe");
+
         mainPage = new MainPage(driver);
         mainPage.open();
     }

@@ -3,31 +3,51 @@ import io.qameta.allure.junit4.DisplayName;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Assert;
 
-import java.util.concurrent.ThreadLocalRandom;
+import com.github.javafaker.Faker;
 
-import static org.junit.Assert.assertTrue;
-
-/* Вход
-Проверь:
-вход по кнопке «Войти в аккаунт» на главной,
-вход через кнопку «Личный кабинет»,
-вход через кнопку в форме регистрации,
-вход через кнопку в форме восстановления пароля.*/
 public class LoginUserTest extends BaseTest {
-
     private final UserApiHelper apiHelper = new UserApiHelper();
     private MainPage mainPage;
     private LoginPage loginPage;
-    int random = ThreadLocalRandom.current().nextInt(100,100_000);
-    private final String email = "zhumanova" + random + "@yandex.ru";
-    private final String name = "Ayslu";
-    private final String password = "UhamakKp17";
+    private String email;
+    private String name;
+    private String password;
+
     @Before
     public void setUpPage() {
-        apiHelper.createUser(email, password, name);
+        Faker faker = new Faker();
+        email = faker.internet().emailAddress();
+        name = faker.name().firstName();
+        password = generateValidPassword();
+
+        createUserWithRetry(3, 1000); // Добавлена функция с повторными попытками
+
         mainPage = new MainPage(driver);
         loginPage = new LoginPage(driver);
+    }
+
+    private void createUserWithRetry(int maxAttempts, long delayMillis) {
+        int attempts = 0;
+        while (attempts < maxAttempts) {
+            try {
+                apiHelper.createUser(email, password, name);
+                Thread.sleep(delayMillis); // Даем немного времени на создание
+                break; // Если успешно создано, выходим из цикла
+            } catch (Exception e) {
+                attempts++;
+                System.err.println("Ошибка при создании пользователя (попытка " + attempts + "/" + maxAttempts + "): " + e.getMessage());
+                try {
+                    Thread.sleep(delayMillis); // Ждем перед следующей попыткой
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+        if (attempts == maxAttempts) {
+            throw new RuntimeException("Не удалось создать пользователя после " + maxAttempts + " попыток!");
+        }
     }
 
     @After
@@ -42,7 +62,7 @@ public class LoginUserTest extends BaseTest {
         mainPage.open();
         mainPage.clickLoginButton();
         loginPage.login(email, password);
-        assertTrue(mainPage.isOrderButtonVisible());
+        Assert.assertTrue(mainPage.isOrderButtonVisible());
     }
 
     @Test
@@ -52,7 +72,7 @@ public class LoginUserTest extends BaseTest {
         mainPage.open();
         mainPage.clickPersonalAccount();
         loginPage.login(email, password);
-        assertTrue(mainPage.isOrderButtonVisible());
+        Assert.assertTrue(mainPage.isOrderButtonVisible());
     }
 
     @Test
@@ -63,7 +83,7 @@ public class LoginUserTest extends BaseTest {
         registerPage.open();
         registerPage.clickLoginLink();
         loginPage.login(email, password);
-        assertTrue(mainPage.isOrderButtonVisible());
+        Assert.assertTrue(mainPage.isOrderButtonVisible());
     }
 
     @Test
@@ -73,6 +93,11 @@ public class LoginUserTest extends BaseTest {
         loginPage.openForgotPasswordPage();
         loginPage.clickLoginFromForgotPassword();
         loginPage.login(email, password);
-        assertTrue(mainPage.isOrderButtonVisible());
+        Assert.assertTrue(mainPage.isOrderButtonVisible());
+    }
+
+    private String generateValidPassword() {
+        // длина от 6 до 12, с верхним/нижним регистром, цифрами и спецсимволами
+        return new Faker().internet().password(6, 12, true, true, true);
     }
 }
