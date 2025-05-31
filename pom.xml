@@ -53,13 +53,6 @@
       <version>${javafaker.version}</version>
     </dependency>
 
-    <!-- WebDriver Manager -->
-    <dependency>
-      <groupId>io.github.bonigarcia</groupId>
-      <artifactId>webdrivermanager</artifactId>
-      <version>5.9.2</version>
-    </dependency>
-
     <!-- Allure -->
     <dependency>
       <groupId>io.qameta.allure</groupId>
@@ -67,11 +60,24 @@
       <version>${allure.version}</version>
     </dependency>
 
+    <!-- WebDriver Manager -->
+    <dependency>
+      <groupId>io.github.bonigarcia</groupId>
+      <artifactId>webdrivermanager</artifactId>
+      <version>5.9.2</version>
+    </dependency>
+
     <!-- API тестирование -->
     <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
       <version>5.3.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.9.0</version>
     </dependency>
 
     <!-- Логирование -->

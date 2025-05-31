@@ -1,12 +1,13 @@
+package pages;
+
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import utils.Endpoints; // Импортируем класс Endpoints
 
 public class MainPage {
 
     private final WebDriver driver;
-
-    private static final String URL = "https://stellarburgers.nomoreparties.site";
 
     // Локаторы
     private final By loginButton = By.xpath("//button[text()='Войти в аккаунт']");
@@ -23,7 +24,7 @@ public class MainPage {
 
     @Step("Открыть главную страницу")
     public void open() {
-        driver.get(URL);
+        driver.get(Endpoints.BASE_URL); // Используем константу из Endpoints
     }
 
     @Step("Нажать кнопку 'Войти в аккаунт'")

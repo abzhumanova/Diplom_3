@@ -1,50 +1,65 @@
+package tests;
+
+import com.github.javafaker.Faker;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
+import models.LoginCredentialsModel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.Assert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
-import com.github.javafaker.Faker;
+import pages.LoginPage;
+import pages.MainPage;
+import pages.RegisterPage;
+import utils.UserApiHelper;
+
+import java.time.Duration;
 
 public class LoginUserTest extends BaseTest {
     private final UserApiHelper apiHelper = new UserApiHelper();
     private MainPage mainPage;
     private LoginPage loginPage;
-    private String email;
-    private String name;
-    private String password;
+    private RegisterPage registerPage;
+    private String email, name, password;
 
     @Before
     public void setUpPage() {
         Faker faker = new Faker();
         email = faker.internet().emailAddress();
         name = faker.name().firstName();
-        password = generateValidPassword();
+        password = faker.internet().password(6, 12, true, true, true);
 
-        createUserWithRetry(3, 1000); // Добавлена функция с повторными попытками
+        createUserWithRetry();
 
         mainPage = new MainPage(driver);
         loginPage = new LoginPage(driver);
+        registerPage = new RegisterPage(driver);
     }
 
-    private void createUserWithRetry(int maxAttempts, long delayMillis) {
+    private void createUserWithRetry() {
+        int maxAttempts = 3;
+        long delayMillis = 1000;
         int attempts = 0;
+
         while (attempts < maxAttempts) {
             try {
-                apiHelper.createUser(email, password, name);
-                Thread.sleep(delayMillis); // Даем немного времени на создание
-                break; // Если успешно создано, выходим из цикла
+                LoginCredentialsModel loginCredentials = new LoginCredentialsModel(email, password);
+                apiHelper.createUser(loginCredentials.getEmail(), loginCredentials.getPassword(), name);
+                break; // Выходим из цикла после успешного создания пользователя
             } catch (Exception e) {
                 attempts++;
-                System.err.println("Ошибка при создании пользователя (попытка " + attempts + "/" + maxAttempts + "): " + e.getMessage());
                 try {
-                    Thread.sleep(delayMillis); // Ждем перед следующей попыткой
+                    Thread.sleep(delayMillis);
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
                 }
             }
         }
+
         if (attempts == maxAttempts) {
             throw new RuntimeException("Не удалось создать пользователя после " + maxAttempts + " попыток!");
         }
@@ -56,48 +71,58 @@ public class LoginUserTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("Login from main page with button 'Войти в аккаунт'")
+    @DisplayName("Вход с главной страницы с помощью кнопки 'Войти в аккаунт'")
     @Description("Проверка входа через кнопку 'Войти в аккаунт' на главной странице")
     public void loginFromMainPageTest() {
         mainPage.open();
         mainPage.clickLoginButton();
         loginPage.login(email, password);
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[text()='Оформить заказ']")));
+
         Assert.assertTrue(mainPage.isOrderButtonVisible());
     }
 
     @Test
-    @DisplayName("Login from main page with button 'Личный кабинет'")
+    @DisplayName("Вход с главной страницы с помощью кнопки 'Личный кабинет'")
     @Description("Проверка входа через кнопку 'Личный кабинет' на главной странице")
     public void loginFromPersonalAccountTest() {
         mainPage.open();
         mainPage.clickPersonalAccount();
         loginPage.login(email, password);
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[text()='Оформить заказ']")));
+
         Assert.assertTrue(mainPage.isOrderButtonVisible());
     }
 
     @Test
-    @DisplayName("Login with link from registration form")
+    @DisplayName("Вход по ссылке из формы регистрации")
     @Description("Проверка входа по ссылке из формы регистрации")
     public void loginFromRegisterFormTest() {
-        RegisterPage registerPage = new RegisterPage(driver);
         registerPage.open();
         registerPage.clickLoginLink();
         loginPage.login(email, password);
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[text()='Оформить заказ']")));
+
         Assert.assertTrue(mainPage.isOrderButtonVisible());
     }
 
     @Test
-    @DisplayName("Login with link from forgot password form")
+    @DisplayName("Вход по ссылке из формы восстановления пароля")
     @Description("Проверка входа по ссылке из формы восстановления пароля")
     public void loginFromForgotPasswordTest() {
         loginPage.openForgotPasswordPage();
         loginPage.clickLoginFromForgotPassword();
         loginPage.login(email, password);
-        Assert.assertTrue(mainPage.isOrderButtonVisible());
-    }
 
-    private String generateValidPassword() {
-        // длина от 6 до 12, с верхним/нижним регистром, цифрами и спецсимволами
-        return new Faker().internet().password(6, 12, true, true, true);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[text()='Оформить заказ']")));
+
+        Assert.assertTrue(mainPage.isOrderButtonVisible());
     }
 }

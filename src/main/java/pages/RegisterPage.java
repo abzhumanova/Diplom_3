@@ -1,6 +1,9 @@
+package pages;
+
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import utils.Endpoints; // Импортируем класс Endpoints
 
 public class RegisterPage {
 
@@ -51,6 +54,6 @@ public class RegisterPage {
     }
     @Step("Открыть страницу регистрации")
     public void open() {
-        driver.get("https://stellarburgers.nomoreparties.site/register");
+        driver.get(Endpoints.REGISTER); // Используем константу из Endpoints
     }
 }

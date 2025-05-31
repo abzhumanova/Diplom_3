@@ -1,6 +1,9 @@
+package pages;
+
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import utils.Endpoints;
 
 public class LoginPage {
 
@@ -49,7 +52,7 @@ public class LoginPage {
     }
     @Step("Открыть страницу восстановления пароля")
     public void openForgotPasswordPage() {
-        driver.get("https://stellarburgers.nomoreparties.site/forgot-password");
+        driver.get(Endpoints.FORGOT_PASSWORD);
     }
 
     @Step("Нажать по ссылке 'Войти' на странице восстановления пароля")
@@ -62,5 +65,11 @@ public class LoginPage {
         enterEmail(email);
         enterPassword(password);
         clickLoginButton();
+    }
+
+    // Добавлен метод getLoginButton()
+    @Step("Получить локатор кнопки 'Войти'")
+    public By getLoginButton() {
+        return loginButton;
     }
 }
